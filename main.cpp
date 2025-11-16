@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
+#include <SFML/Network.hpp>
 #include <string>
 #include <windows.h>
 #include <fstream>
@@ -101,8 +102,10 @@ int main() {
 
     Sprite gun(gunTexture);
     gun.setScale(Vector2f(1.5, 1.5));
-    gun.setPosition(Vector2f(player.getPosition()));
+    gun.setPosition(player.getPosition());
     //End
+
+    Vector2f secondPlayerPos(720, 400);
 
     //MAP
     RectangleShape map[150];
@@ -124,8 +127,11 @@ int main() {
                     square.setFillColor(Color(0, 153, 51));
                     map[i + 15 * yMap] = square;
                 }
-                else if (line[i] == '0') {
+                else if (line[i] == 'r') {
                     player.setPosition(Vector2f(i * 80, yMap * 80));
+                }
+                else if (line[i] == 'b') {
+                    secondPlayerPos = Vector2f(i * 80, yMap * 80);
                 }
             }
 
@@ -141,10 +147,10 @@ int main() {
     bool facing_right = true;
     Bullet bullets[50];
     unsigned short bullets_count = 0;
+    //End
 
-    Clock explosionClock;
-    float explosionStartTime = 0;
-    bool explosionActive = false;
+    //TCP Varuables
+    
     //End
 
     sf::RenderWindow window(sf::VideoMode({ 1200, 800 }), "BimBamBoom2D");
@@ -154,6 +160,7 @@ int main() {
     if (!explosionShader.loadFromFile("exp.frag", Shader::Type::Fragment)) {
         return -2;
     }
+    explosionShader.setUniform("screen_size", Vector2f(1200, 800));
     CircleShape explosion;
     explosion.setPosition(Vector2f(-1000, -1000));
     explosion.setRadius(50);
@@ -172,7 +179,8 @@ int main() {
             if (const auto& key = event->getIf<Event::MouseButtonPressed>()) {
                 if (key->button == Mouse::Button::Left) {
                     if (bullets_count < 50) {
-                        Vector2i mousePosition = Mouse::getPosition(window);
+                        Vector2i mousePositio = Mouse::getPosition(window);
+                        Vector2f mousePosition(mousePositio.x - 16, mousePositio.y - 16);
                         bullets[bullets_count].setX(gun.getPosition().x);
                         bullets[bullets_count].setY(gun.getPosition().y);
                         bullets[bullets_count].setAngle(atan2(mousePosition.y - gun.getPosition().y, mousePosition.x - gun.getPosition().x));
@@ -264,33 +272,16 @@ int main() {
                 FloatRect bulletBounds(Vector2f(bullets[i].getX(), bullets[i].getY()), Vector2f(32, 32));
 
                 if (groundBound.findIntersection(bulletBounds) && bullets[i].getX() >= 0 && bullets[i].getY() >= 0) {
-                    ;
-                    explosion.setPosition(Vector2f(bullets[i].getX(), bullets[i].getY()));
-                    explosionStartTime = explosionClock.getElapsedTime().asSeconds();
-                    explosionActive = true;
-
-                    explosionShader.setUniform("positionCenter", Vector2f(bullets[i].getX(), bullets[i].getY()));
-                    explosionShader.setUniform("maxSize", 50);
+                    explosion.setPosition(Vector2f(bullets[i].getX() - 50, bullets[i].getY() - 50));
+                    explosionShader.setUniform("center", Vector2f(explosion.getPosition().x + 50, explosion.getPosition().y + 50));
 
                     bullets[i].setActive(false);
-
                     bullets[i].setX(-1000);
                     bullets[i].setY(-1000);
                 }
             }
         }
         //End
-
-        if (explosionActive) {
-            float currentTime = explosionClock.getElapsedTime().asSeconds();
-            float elapsed = currentTime - explosionStartTime;
-
-            explosionShader.setUniform("time", elapsed);
-
-            if (elapsed > 1.5f) {
-                explosionActive = false;
-            }
-        }
 
         window.clear(sf::Color(153, 204, 255));
         //draw map

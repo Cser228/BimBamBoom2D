@@ -3,5 +3,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="BimBamBoom2D.vcxproj" />
+  <Project Path="BimBamBoom2D.vcxproj" Id="601c36ff-f71f-4d57-bbf4-dd9d08aefbd2" />
 </Solution>
