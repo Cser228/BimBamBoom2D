@@ -266,7 +266,7 @@ int main() {
                 if (groundBound.findIntersection(bulletBounds) && bullets[i].getX() >= 0 && bullets[i].getY() >= 0) {
                     ;
                     explosion.setPosition(Vector2f(bullets[i].getX(), bullets[i].getY()));
-                    explosionStartTime = explosionClock.getElapsedTime().asSeconds(); // ЗАПОМНИ время начала
+                    explosionStartTime = explosionClock.getElapsedTime().asSeconds();
                     explosionActive = true;
 
                     explosionShader.setUniform("positionCenter", Vector2f(bullets[i].getX(), bullets[i].getY()));
@@ -287,7 +287,6 @@ int main() {
 
             explosionShader.setUniform("time", elapsed);
 
-            // Автоматически выключи взрыв через 1.5 секунды
             if (elapsed > 1.5f) {
                 explosionActive = false;
             }
